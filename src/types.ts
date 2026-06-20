@@ -20,6 +20,8 @@ export interface TurtleProps {
   scale?: number
   /** When true, disables the idle roll animation (prefers-reduced-motion). */
   reducedMotion?: boolean
+  /** Swim-cycle timeScale (0 = frozen, 1 = full speed). */
+  speed?: number
 }
 
 export interface SpheresProps {
