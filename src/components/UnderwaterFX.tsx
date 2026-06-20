@@ -6,7 +6,7 @@ import { AdditiveBlending } from 'three'
 
 const rand = (min: number, max: number): number => min + Math.random() * (max - min)
 
-type RaySeed = {
+interface RaySeed {
   basePos: [number, number, number]
   baseRot: [number, number, number]
   baseScale: [number, number, number]

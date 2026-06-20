@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import type { ReactElement } from 'react'
-import type { Group } from 'three'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import type { TurtleProps } from '../types'
@@ -17,13 +16,16 @@ export const Turtle = (props: TurtleProps): ReactElement => {
   const { actions, mixer } = useAnimations(animations, scene)
 
   useEffect(() => {
+    // Mutating three.js objects returned from drei hooks is the idiomatic r3f pattern.
+    // eslint-disable-next-line react-hooks/immutability
     mixer.timeScale = 0.5
     actions['Swim Cycle']?.play()
   }, [actions, mixer])
 
   useFrame((state) => {
+    // eslint-disable-next-line react-hooks/immutability
     scene.rotation.z = Math.sin(state.clock.elapsedTime / 4) / 2
   })
 
-  return <primitive object={scene as Group} {...props} />
+  return <primitive object={scene} {...props} />
 }

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react'
-import type * as THREE from 'three'
+import * as THREE from 'three'
 import type { ReactElement, ReactNode } from 'react'
 import { useMask, useGLTF, MeshTransmissionMaterial } from '@react-three/drei'
 import type { AquariumProps } from '../types'
@@ -14,8 +14,7 @@ export const Aquarium = ({ children, ...props }: AquariumProps & { children?: Re
   useLayoutEffect(() => {
     if (!ref.current) return
     ref.current.traverse((child) => {
-      const mesh = child as THREE.Mesh
-      if (mesh.material) Object.assign(mesh.material, stencil)
+      if (child instanceof THREE.Mesh && child.material) Object.assign(child.material, stencil)
     })
   }, [stencil])
 

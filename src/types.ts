@@ -7,24 +7,24 @@ export type SphereData = readonly [scale: number, color: string, speed: number, 
 
 export type AquariumProps = ThreeElements['group']
 
-export type SphereProps = {
+export interface SphereProps {
   position?: Vec3
   scale?: number
   speed?: number
   color?: string
 }
 
-export type TurtleProps = {
+export interface TurtleProps {
   position?: Vec3
   rotation?: Vec3
   scale?: number
 }
 
-export type SpheresProps = {
+export interface SpheresProps {
   spheres: SphereData[]
 }
 
-export type AppProps = {
+export interface AppProps {
   spheres: SphereData[]
   children?: ReactNode
 }
