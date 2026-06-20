@@ -6,17 +6,17 @@ import { Turtle } from './components/Turtle'
 import { Spheres } from './components/Spheres'
 import { SoftShadows } from './components/SoftShadows'
 import { AquariumEnvironment } from './components/AquariumEnvironment'
-import { CausticsFloor, GodRays, Particles } from './components/UnderwaterFX'
 import type { AppProps } from './types'
 
 export const App = ({ spheres }: AppProps): ReactElement => {
   return (
     <Canvas shadows camera={{ position: [30, 0, -3], fov: 35, near: 1, far: 50 }} gl={{ stencil: true }}>
-      <color attach="background" args={['#5fa8b3']} />
-      <fog attach="fog" args={['#3d7d85', 18, 45]} />
-      {/** Sunlight piercing the water from above */}
-      <spotLight position={[2, 22, 6]} angle={0.5} penumbra={1} intensity={3} color="#eaf6ff" castShadow />
-      <ambientLight intensity={0.4} color="#9fd6e0" />
+      <color attach="background" args={['#2c5f6e']} />
+      <fog attach="fog" args={['#2c5f6e', 20, 48]} />
+      {/** Static light sources piercing the water from above */}
+      <spotLight position={[0, 22, 0]} angle={0.5} penumbra={1} intensity={3} color="#fff4d6" castShadow />
+      <ambientLight intensity={0.35} color="#6fa8b8" />
+      <hemisphereLight args={['#bfe3ec', '#1a3d45', 0.6]} />
       {/** Glass aquarium */}
       <Aquarium position={[0, 0.25, 0]}>
         <Float rotationIntensity={2} floatIntensity={10} speed={2}>
@@ -24,10 +24,6 @@ export const App = ({ spheres }: AppProps): ReactElement => {
         </Float>
         <Spheres spheres={spheres} />
       </Aquarium>
-      {/** Underwater atmosphere */}
-      <GodRays count={7} />
-      <CausticsFloor />
-      <Particles count={200} />
       {/** Soft shadows */}
       <SoftShadows />
       {/** Custom environment map */}
