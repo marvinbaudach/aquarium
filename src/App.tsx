@@ -7,7 +7,6 @@ import { Spheres } from './components/Spheres'
 import { SoftShadows } from './components/SoftShadows'
 import { AquariumEnvironment } from './components/AquariumEnvironment'
 import { PostProcessing } from './components/PostProcessing'
-import { Bubbles } from './components/Bubbles'
 import { MouseParallax } from './components/MouseParallax'
 import { ControlDock } from './components/ControlDock'
 import { useAdaptiveQuality } from './hooks/useAdaptiveQuality'
@@ -66,15 +65,13 @@ export const App = ({ spheres }: AppProps): ReactElement => {
             )}
             <Spheres spheres={visibleSpheres} />
           </Aquarium>
-          {/** Click-to-spawn bubbles */}
-          <Bubbles />
           {/** Soft shadows */}
           <SoftShadows />
         </MouseParallax>
         {/** Custom environment map */}
         <AquariumEnvironment />
-        {/** Cinematic post: Bloom always; DoF only on desktop (expensive pass). */}
-        <PostProcessing enableDoF={!isMobile} bloomIntensity={bloomIntensity} />
+        {/** Cinematic post: Bloom driven by dock slider. */}
+        <PostProcessing bloomIntensity={bloomIntensity} />
         <CameraControls truckSpeed={0} dollySpeed={0} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
       </Canvas>
       <ControlDock controls={controls} />

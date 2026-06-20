@@ -1,18 +1,15 @@
 import type { ReactElement } from 'react'
-import { EffectComposer, Bloom, DepthOfField, Vignette, SMAA } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Vignette, SMAA } from '@react-three/postprocessing'
 
 interface PostProcessingProps {
-  /** Disable DoF on low-power devices (DoF is the most expensive pass). */
-  enableDoF: boolean
   /** Bloom intensity multiplier (driven by the control dock). */
   bloomIntensity: number
 }
 
-export const PostProcessing = ({ enableDoF, bloomIntensity }: PostProcessingProps): ReactElement => {
+export const PostProcessing = ({ bloomIntensity }: PostProcessingProps): ReactElement => {
   return (
-    <EffectComposer multisampling={0} enableNormalPass={false}>
+    <EffectComposer multisampling={0} enableNormalPass={false} stencilBuffer>
       <Bloom intensity={bloomIntensity} luminanceThreshold={0.6} luminanceSmoothing={0.9} mipmapBlur />
-      {enableDoF ? <DepthOfField focusDistance={0.02} focalLength={0.05} bokehScale={3} height={480} /> : <></>}
       <Vignette eskil={false} offset={0.2} darkness={0.6} />
       <SMAA />
     </EffectComposer>

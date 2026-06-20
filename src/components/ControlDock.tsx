@@ -61,6 +61,8 @@ const toggleStyle = (active: boolean): CSSProperties => ({
   opacity: active ? 1 : 0.6,
   transition: 'opacity 0.15s',
   whiteSpace: 'nowrap',
+  width: 84,
+  justifyContent: 'center',
 })
 
 export const ControlDock = ({ controls }: ControlDockProps): ReactElement => {
