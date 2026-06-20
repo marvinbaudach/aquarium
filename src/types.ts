@@ -18,6 +18,8 @@ export interface TurtleProps {
   position?: Vec3
   rotation?: Vec3
   scale?: number
+  /** When true, disables the idle roll animation (prefers-reduced-motion). */
+  reducedMotion?: boolean
 }
 
 export interface SpheresProps {

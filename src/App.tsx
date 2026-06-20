@@ -1,16 +1,31 @@
 import type { ReactElement } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Float, CameraControls } from '@react-three/drei'
+import { Float, CameraControls, PerformanceMonitor } from '@react-three/drei'
 import { Aquarium } from './components/Aquarium'
 import { Turtle } from './components/Turtle'
 import { Spheres } from './components/Spheres'
 import { SoftShadows } from './components/SoftShadows'
 import { AquariumEnvironment } from './components/AquariumEnvironment'
+import { PostProcessing } from './components/PostProcessing'
+import { useAdaptiveQuality } from './hooks/useAdaptiveQuality'
 import type { AppProps } from './types'
 
 export const App = ({ spheres }: AppProps): ReactElement => {
+  const { isMobile, reducedMotion, dpr, setDpr } = useAdaptiveQuality()
+
   return (
-    <Canvas shadows camera={{ position: [30, 0, -3], fov: 35, near: 1, far: 50 }} gl={{ stencil: true }}>
+    <Canvas
+      shadows
+      dpr={dpr}
+      camera={{ position: [30, 0, -3], fov: 35, near: 1, far: 50 }}
+      gl={{ stencil: true, antialias: !isMobile }}
+    >
+      {/* Auto-adaptive quality: scale DPR by the live performance factor so a
+          struggling device backs off and a fast one climbs toward native. */}
+      <PerformanceMonitor
+        onDecline={() => { setDpr(Math.max(0.5, dpr - 0.25)) }}
+        onIncline={() => { setDpr(Math.min(isMobile ? 1.5 : 2, dpr + 0.25)) }}
+      />
       <color attach="background" args={['#2c5f6e']} />
       <fog attach="fog" args={['#2c5f6e', 20, 48]} />
       {/** Static light sources piercing the water from above */}
@@ -19,15 +34,21 @@ export const App = ({ spheres }: AppProps): ReactElement => {
       <hemisphereLight args={['#bfe3ec', '#1a3d45', 0.6]} />
       {/** Glass aquarium */}
       <Aquarium position={[0, 0.25, 0]}>
-        <Float rotationIntensity={2} floatIntensity={10} speed={2}>
-          <Turtle position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
-        </Float>
+        {reducedMotion ? (
+          <Turtle reducedMotion position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
+        ) : (
+          <Float rotationIntensity={2} floatIntensity={10} speed={2}>
+            <Turtle position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
+          </Float>
+        )}
         <Spheres spheres={spheres} />
       </Aquarium>
       {/** Soft shadows */}
       <SoftShadows />
       {/** Custom environment map */}
       <AquariumEnvironment />
+      {/** Cinematic post: Bloom always; DoF only on desktop (expensive pass). */}
+      <PostProcessing enableDoF={!isMobile} />
       <CameraControls truckSpeed={0} dollySpeed={0} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
     </Canvas>
   )
