@@ -53,11 +53,20 @@ npm run preview      # serve the production build locally
 ```
 src/
 ├── index.tsx               # mount + overlay (Logo, "ok —", date) + sphere data
-├── App.tsx                 # Canvas, Aquarium (glass + stencil), Turtle, Sphere, Environment, shadows
+├── App.tsx                 # Canvas + composition of all components
+├── types.ts                # shared prop types (SphereData, Aquarium/Turtle/Sphere props)
+├── components/
+│   ├── Aquarium.tsx        # glass cube (MeshTransmissionMaterial) + stencil-masked contents
+│   ├── Turtle.tsx          # rigged turtle GLB, Swim Cycle animation + roll
+│   ├── Sphere.tsx          # single instanced sphere wrapped in Float
+│   ├── Spheres.tsx         # Instances container mapping the sphere data
+│   ├── SoftShadows.tsx     # AccumulativeShadows + RandomizedLight
+│   └── AquariumEnvironment.tsx  # Lightformer-based Environment cubemap
 ├── styles.css              # reset, Inter font, canvas fade-in
 ├── vite-env.d.ts
-├── shapes-transformed.glb  # glass-cube mesh
-└── model_52a_-_kemps_ridley_sea_turtle_no_id-transformed.glb  # rigged turtle
+└── assets/
+    ├── shapes-transformed.glb  # glass-cube mesh
+    └── model_52a_-_kemps_ridley_sea_turtle_no_id-transformed.glb  # rigged turtle
 ```
 
 ## Credits
