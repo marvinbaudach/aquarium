@@ -11,20 +11,20 @@ License: CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
 Source: https://sketchfab.com/3d-models/model-52a-kemps-ridley-sea-turtle-no-id-7aba937dfbce480fb3aca47be3a9740b
 Title: Model 52A - Kemps Ridley Sea Turtle (no ID)
 */
+// Mutates three.js objects (scene rotation) returned from hooks — the idiomatic r3f pattern.
+/* eslint-disable react-hooks/immutability */
+
 export const Turtle = ({ reducedMotion = false, speed = 0.5, ...props }: TurtleProps): ReactElement => {
   const { scene, animations } = useGLTF(turtleModel)
   const { actions, mixer } = useAnimations(animations, scene)
 
   useEffect(() => {
-    // Mutating three.js objects returned from drei hooks is the idiomatic r3f pattern.
-    // eslint-disable-next-line react-hooks/immutability
     mixer.timeScale = reducedMotion ? 0 : speed
     actions['Swim Cycle']?.play()
   }, [actions, mixer, reducedMotion, speed])
 
   useFrame((state) => {
     if (reducedMotion) return
-    // eslint-disable-next-line react-hooks/immutability
     scene.rotation.z = Math.sin(state.clock.elapsedTime / 4) / 2
   })
 

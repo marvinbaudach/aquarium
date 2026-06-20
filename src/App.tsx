@@ -8,6 +8,7 @@ import { SoftShadows } from './components/SoftShadows'
 import { AquariumEnvironment } from './components/AquariumEnvironment'
 import { PostProcessing } from './components/PostProcessing'
 import { MouseParallax } from './components/MouseParallax'
+import { Bubbles } from './components/Bubbles'
 import { ControlDock } from './components/ControlDock'
 import { useAdaptiveQuality } from './hooks/useAdaptiveQuality'
 import { useSceneControls } from './hooks/useSceneControls'
@@ -46,16 +47,17 @@ export const App = ({ spheres }: AppProps): ReactElement => {
           position={[0, 22, 0]}
           angle={0.5}
           penumbra={1}
-          intensity={isNight ? 1.2 : 3}
+          intensity={isNight ? 0.6 : 1.4}
           color={isNight ? '#9fc8ff' : '#fff4d6'}
           castShadow
         />
-        <ambientLight intensity={isNight ? 0.15 : 0.35} color={isNight ? '#2a4a6a' : '#6fa8b8'} />
-        <hemisphereLight args={[isNight ? '#1a2a40' : '#bfe3ec', '#1a3d45', isNight ? 0.3 : 0.6]} />
+        <ambientLight intensity={isNight ? 0.08 : 0.15} color={isNight ? '#2a4a6a' : '#6fa8b8'} />
+        <hemisphereLight args={[isNight ? '#1a2a40' : '#bfe3ec', '#1a3d45', isNight ? 0.15 : 0.3]} />
         {/** Scene contents with subtle mouse-driven parallax */}
         <MouseParallax intensity={0.06}>
-          {/** Glass aquarium */}
+          {/** Glass aquarium — contents are stencil-masked to the glass volume */}
           <Aquarium position={[0, 0.25, 0]}>
+            {/** Turtle with swim cycle */}
             {reducedMotion ? (
               <Turtle reducedMotion speed={turtleSpeed} position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
             ) : (
@@ -64,6 +66,8 @@ export const App = ({ spheres }: AppProps): ReactElement => {
               </Float>
             )}
             <Spheres spheres={visibleSpheres} />
+            {/** Continuous ascending bubble stream */}
+            <Bubbles />
           </Aquarium>
           {/** Soft shadows */}
           <SoftShadows />
