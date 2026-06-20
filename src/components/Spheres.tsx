@@ -1,12 +1,9 @@
+import type { ReactElement } from 'react'
 import { Instances } from '@react-three/drei'
-import type { SphereData } from '../types'
+import type { SpheresProps } from '../types'
 import { Sphere } from './Sphere'
 
-type SpheresProps = {
-  spheres: SphereData[]
-}
-
-export const Spheres = ({ spheres }: SpheresProps) => {
+export const Spheres = ({ spheres }: SpheresProps): ReactElement => {
   return (
     <Instances renderOrder={-1000}>
       <sphereGeometry args={[1, 64, 64]} />

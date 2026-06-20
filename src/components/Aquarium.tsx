@@ -1,26 +1,27 @@
 import { useLayoutEffect, useRef } from 'react'
 import type * as THREE from 'three'
+import type { ReactElement, ReactNode } from 'react'
 import { useMask, useGLTF, MeshTransmissionMaterial } from '@react-three/drei'
-import type { PropsWithChildren } from 'react'
 import type { AquariumProps } from '../types'
 import shapesModel from '../assets/shapes-transformed.glb?url'
 
-export const Aquarium = ({ children, ...props }: PropsWithChildren<AquariumProps>) => {
+export const Aquarium = ({ children, ...props }: AquariumProps & { children?: ReactNode }): ReactElement => {
   const ref = useRef<THREE.Group>(null)
   const { nodes } = useGLTF(shapesModel)
   const stencil = useMask(1, false)
+  const cubeGeometry = (nodes.Cube as THREE.Mesh).geometry
 
   useLayoutEffect(() => {
     if (!ref.current) return
     ref.current.traverse((child) => {
       const mesh = child as THREE.Mesh
-      if (mesh.material) Object.assign(mesh.material, { ...stencil })
+      if (mesh.material) Object.assign(mesh.material, stencil)
     })
-  }, [])
+  }, [stencil])
 
   return (
     <group {...props} dispose={null}>
-      <mesh castShadow scale={[0.61 * 6, 0.8 * 6, 1 * 6]} geometry={(nodes.Cube as THREE.Mesh).geometry}>
+      <mesh castShadow scale={[0.61 * 6, 0.8 * 6, 1 * 6]} geometry={cubeGeometry}>
         <MeshTransmissionMaterial
           backside
           samples={4}
