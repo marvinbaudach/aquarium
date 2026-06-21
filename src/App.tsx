@@ -86,7 +86,7 @@ export const App = ({ spheres }: AppProps): ReactElement => {
             {/** Fill light from the camera side so the turtle reads through the glass */}
             <directionalLight position={[22, 6, -12]} intensity={isNight ? 0.35 : 0.9} color="#dff2ff" />
             {/** Scene contents with subtle mouse-driven parallax */}
-            <MouseParallax intensity={0.06}>
+            <MouseParallax intensity={0.018}>
               {/** Glass aquarium — contents are stencil-masked to the glass volume */}
               <Aquarium position={[0, 0.25, 0]}>
                 {/** Turtle with swim cycle */}
