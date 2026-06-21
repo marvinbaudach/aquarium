@@ -2,12 +2,39 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aquarium</title>
+
+    <title>Aquarium — interactive 3D sea turtle in a glass cube</title>
+    <meta
+      name="description"
+      content="An interactive WebGL aquarium built with React Three Fiber: a rigged Kemp's Ridley sea turtle swims inside a transmissive glass cube surrounded by floating spheres. Drag to orbit."
+    />
+    <meta name="theme-color" content="#0a2030" />
+
+    <!-- Open Graph / Twitter. Absolute URL required: the Vite base is './' so a
+         relative og:image would not resolve for crawlers. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Aquarium — interactive 3D sea turtle in a glass cube" />
+    <meta
+      property="og:description"
+      content="A React Three Fiber WebGL scene: a sea turtle swims inside a transmissive glass cube. Drag to orbit, tune the scene live."
+    />
+    <meta property="og:url" content="https://marvinbaudach.github.io/aquarium/" />
+    <meta property="og:image" content="https://marvinbaudach.github.io/aquarium/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Aquarium — interactive 3D sea turtle in a glass cube" />
+    <meta
+      name="twitter:description"
+      content="A React Three Fiber WebGL scene: a sea turtle swims inside a transmissive glass cube."
+    />
+    <meta name="twitter:image" content="https://marvinbaudach.github.io/aquarium/og.png" />
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      This interactive 3D aquarium requires JavaScript and a WebGL2-capable browser.
+    </noscript>
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>
