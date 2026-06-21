@@ -10,6 +10,7 @@ import { AquariumEnvironment } from './components/AquariumEnvironment'
 import { PostProcessing } from './components/PostProcessing'
 import { MouseParallax } from './components/MouseParallax'
 import { Bubbles } from './components/Bubbles'
+import { FishSchool } from './components/FishSchool'
 import { Motes } from './components/Motes'
 import { Caustics } from './components/Caustics'
 import { SeaBackground } from './components/SeaBackground'
@@ -93,11 +94,13 @@ export const App = ({ spheres }: AppProps): ReactElement => {
                 {reducedMotion ? (
                   <Turtle reducedMotion speed={turtleSpeed} position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
                 ) : (
-                  <Float rotationIntensity={2} floatIntensity={10} speed={2}>
+                  <Float rotationIntensity={2} floatIntensity={3} speed={2}>
                     <Turtle speed={turtleSpeed} position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
                   </Float>
                 )}
                 <Spheres spheres={visibleSpheres} />
+                {/** Procedural fish school circling near the surface */}
+                <FishSchool />
                 {/** Continuous ascending bubble stream */}
                 <Bubbles />
                 {/** Suspended drifting particles (marine snow) */}
@@ -112,7 +115,15 @@ export const App = ({ spheres }: AppProps): ReactElement => {
             <AquariumEnvironment />
             {/** Cinematic post: Bloom driven by dock slider. */}
             <PostProcessing bloomIntensity={bloomIntensity} />
-            <CameraControls ref={cameraRef} truckSpeed={0} dollySpeed={0} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
+            <CameraControls
+          ref={cameraRef}
+          truckSpeed={0}
+          dollySpeed={1}
+          minDistance={14}
+          maxDistance={42}
+          minPolarAngle={0}
+          maxPolarAngle={Math.PI / 2}
+        />
           </Suspense>
         </Canvas>
       </WebGLErrorBoundary>
