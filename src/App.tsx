@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useRef } from 'react'
 import type { ComponentRef, CSSProperties, ReactElement } from 'react'
+import * as THREE from 'three'
 import { Canvas } from '@react-three/fiber'
 import { Float, CameraControls, PerformanceMonitor } from '@react-three/drei'
 import { Aquarium } from './components/Aquarium'
@@ -36,12 +37,39 @@ export const App = ({ spheres }: AppProps): ReactElement => {
   const cameraRef = useRef<ComponentRef<typeof CameraControls>>(null)
 
   // Cinematic entrance: snap to a wide, high vantage then ease into the resting
-  // framing. Skipped entirely under prefers-reduced-motion.
+  // framing. Skipped entirely under prefers-reduced-motion. The resting distance
+  // is aspect-aware: on a narrow portrait viewport (phones) the fixed vertical
+  // FOV leaves the wide tank — and the turtle — filling only a thin strip, so we
+  // dolly in. Landscape/desktop keeps the original 30-unit framing.
   useEffect(() => {
     const cam = cameraRef.current
-    if (!cam || reducedMotion) return
+    if (!cam) return
+
+    const restingLookAt = (): [number, number, number] => {
+      const aspect = window.innerWidth / window.innerHeight
+      // Portrait shrinks horizontal coverage; pull the camera closer so the
+      // turtle reads without manual zoom. Clamp to CameraControls' minDistance.
+      const distance = aspect < 1 ? THREE.MathUtils.lerp(16, 30, aspect) : 30
+      const dir = new THREE.Vector3(30, 0, -3).normalize().multiplyScalar(distance)
+      return [dir.x, dir.y, dir.z]
+    }
+
+    const [x, y, z] = restingLookAt()
+    if (reducedMotion) {
+      void cam.setLookAt(x, y, z, 0, 0, 0, false)
+      return
+    }
     void cam.setLookAt(46, 22, -26, 0, 0, 0, false)
-    void cam.setLookAt(30, 0, -3, 0, 0, 0, true)
+    void cam.setLookAt(x, y, z, 0, 0, 0, true)
+
+    // Re-frame on orientation change so rotating the device keeps the turtle
+    // well-sized.
+    const onResize = (): void => {
+      const [nx, ny, nz] = restingLookAt()
+      void cam.setLookAt(nx, ny, nz, 0, 0, 0, true)
+    }
+    window.addEventListener('orientationchange', onResize)
+    return () => { window.removeEventListener('orientationchange', onResize) }
   }, [reducedMotion])
   const { turtleSpeed, sphereCount, isNight, bloomIntensity } = controls
 
