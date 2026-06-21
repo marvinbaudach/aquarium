@@ -9,6 +9,9 @@ body,
 #root {
   width: 100%;
   height: 100%;
+  /* Dynamic viewport unit so mobile browser chrome (address bar / home
+     indicator) never clips the bottom control dock. */
+  height: 100dvh;
   margin: 0;
   padding: 0;
 }
@@ -16,6 +19,11 @@ body,
 body {
   background: #2c5f6e;
   font-family: 'Inter';
+  /* Mobile polish: no rubber-band scroll, no blue tap flash, no text select. */
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 a {

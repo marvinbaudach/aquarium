@@ -24,8 +24,8 @@ const SAMPLE_MS = 500
 
 const pillStyle: CSSProperties = {
   position: 'absolute',
-  top: 16,
-  right: 16,
+  top: 'calc(16px + env(safe-area-inset-top, 0px))',
+  right: 'calc(16px + env(safe-area-inset-right, 0px))',
   zIndex: 15,
   display: 'flex',
   flexDirection: 'column',
