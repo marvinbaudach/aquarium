@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export interface SceneControls {
   /** Turtle swim-cycle timeScale (0 = frozen, 1 = full speed). */
@@ -15,20 +15,92 @@ export interface SceneControls {
   setBloomIntensity: (v: number) => void
 }
 
-export const useSceneControls = (): SceneControls => {
-  const [turtleSpeed, setTurtleSpeed] = useState(0.5)
-  const [sphereCount, setSphereCount] = useState(12)
-  const [isNight, setIsNight] = useState(false)
-  const [bloomIntensity, setBloomIntensity] = useState(0.6)
+interface SceneState {
+  turtleSpeed: number
+  sphereCount: number
+  isNight: boolean
+  bloomIntensity: number
+}
+
+const DEFAULTS: SceneState = {
+  turtleSpeed: 0.5,
+  sphereCount: 12,
+  isNight: false,
+  bloomIntensity: 0.6
+}
+
+const STORAGE_KEY = 'aquarium:controls'
+
+const clamp = (v: number, min: number, max: number): number => Math.min(max, Math.max(min, v))
+
+// Resolve initial state: URL query params win (shareable links), then
+// localStorage (returning visitor), then defaults. Every value is validated and
+// clamped so a hand-edited URL can't push the scene into an invalid state.
+const readInitialState = (): SceneState => {
+  if (typeof window === 'undefined') return DEFAULTS
+
+  const stored = ((): Partial<SceneState> => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      return raw ? (JSON.parse(raw) as Partial<SceneState>) : {}
+    } catch {
+      return {}
+    }
+  })()
+
+  const params = new URLSearchParams(window.location.search)
+  const num = (key: string, fallback: number): number => {
+    const parsed = Number(params.get(key))
+    return params.has(key) && !Number.isNaN(parsed) ? parsed : fallback
+  }
 
   return {
-    turtleSpeed,
-    setTurtleSpeed,
-    sphereCount,
-    setSphereCount,
-    isNight,
-    setIsNight,
-    bloomIntensity,
-    setBloomIntensity,
+    turtleSpeed: clamp(num('turtle', stored.turtleSpeed ?? DEFAULTS.turtleSpeed), 0, 1),
+    sphereCount: clamp(Math.round(num('spheres', stored.sphereCount ?? DEFAULTS.sphereCount)), 0, 12),
+    isNight: params.has('night') ? params.get('night') === '1' : (stored.isNight ?? DEFAULTS.isNight),
+    bloomIntensity: clamp(num('bloom', stored.bloomIntensity ?? DEFAULTS.bloomIntensity), 0, 2)
+  }
+}
+
+const persist = (state: SceneState): void => {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  } catch {
+    // localStorage unavailable (private mode / quota) — URL still carries state.
+  }
+  const params = new URLSearchParams()
+  params.set('turtle', state.turtleSpeed.toFixed(2))
+  params.set('spheres', String(state.sphereCount))
+  params.set('bloom', state.bloomIntensity.toFixed(2))
+  params.set('night', state.isNight ? '1' : '0')
+  const url = `${window.location.pathname}?${params.toString()}`
+  window.history.replaceState(null, '', url)
+}
+
+export const useSceneControls = (): SceneControls => {
+  const [state, setState] = useState<SceneState>(readInitialState)
+
+  useEffect(() => {
+    persist(state)
+  }, [state])
+
+  return {
+    turtleSpeed: state.turtleSpeed,
+    setTurtleSpeed: (turtleSpeed) => {
+      setState((s) => ({ ...s, turtleSpeed }))
+    },
+    sphereCount: state.sphereCount,
+    setSphereCount: (sphereCount) => {
+      setState((s) => ({ ...s, sphereCount }))
+    },
+    isNight: state.isNight,
+    setIsNight: (isNight) => {
+      setState((s) => ({ ...s, isNight }))
+    },
+    bloomIntensity: state.bloomIntensity,
+    setBloomIntensity: (bloomIntensity) => {
+      setState((s) => ({ ...s, bloomIntensity }))
+    }
   }
 }
