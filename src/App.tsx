@@ -115,15 +115,7 @@ export const App = ({ spheres }: AppProps): ReactElement => {
             <AquariumEnvironment />
             {/** Cinematic post: Bloom driven by dock slider. */}
             <PostProcessing bloomIntensity={bloomIntensity} />
-            <CameraControls
-          ref={cameraRef}
-          truckSpeed={0}
-          dollySpeed={1}
-          minDistance={14}
-          maxDistance={42}
-          minPolarAngle={0}
-          maxPolarAngle={Math.PI / 2}
-        />
+            <CameraControls ref={cameraRef} truckSpeed={0} dollySpeed={1} minDistance={14} maxDistance={42} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
           </Suspense>
         </Canvas>
       </WebGLErrorBoundary>
