@@ -9,7 +9,7 @@ interface PostProcessingProps {
 export const PostProcessing = ({ bloomIntensity }: PostProcessingProps): ReactElement => {
   return (
     <EffectComposer multisampling={0} enableNormalPass={false} stencilBuffer>
-      <Bloom intensity={bloomIntensity} luminanceThreshold={0.6} luminanceSmoothing={0.9} mipmapBlur />
+      <Bloom intensity={bloomIntensity} luminanceThreshold={0.85} luminanceSmoothing={0.9} mipmapBlur />
       <Vignette eskil={false} offset={0.2} darkness={0.6} />
       <SMAA />
     </EffectComposer>

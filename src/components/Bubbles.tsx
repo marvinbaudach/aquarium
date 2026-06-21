@@ -7,8 +7,8 @@ import * as THREE from 'three'
 // the aquarium. Placed as a child of the aquarium group → local space.
 /* eslint-disable react-hooks/immutability, react-hooks/purity */
 
-const POOL = 60
-const SPAWN_INTERVAL = 0.35
+const POOL = 100
+const SPAWN_INTERVAL = 0.18
 const RISE_SPEED = 1.4
 const FLOOR_Y = -2.1
 const CEILING_Y = 2.1
@@ -34,9 +34,9 @@ export const Bubbles = (): ReactElement => {
         pos: new THREE.Vector3(),
         vel: new THREE.Vector3(),
         scale: 1,
-        seed: Math.random() * 100,
+        seed: Math.random() * 100
       })),
-    [],
+    []
   )
 
   const spawn = (): void => {

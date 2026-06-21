@@ -23,19 +23,24 @@ export const Aquarium = ({ children, ...props }: AquariumProps & { children?: Re
       <mesh castShadow scale={[0.61 * 6, 0.8 * 6, 1 * 6]} geometry={cubeGeometry}>
         <MeshTransmissionMaterial
           backside
-          samples={4}
-          thickness={3}
-          chromaticAberration={0.025}
+          samples={8}
+          thickness={1.4}
+          roughness={0.02}
+          chromaticAberration={0.02}
           anisotropy={0.1}
-          distortion={0.1}
+          distortion={0.04}
           distortionScale={0.1}
-          temporalDistortion={0.2}
-          iridescence={1}
-          iridescenceIOR={1}
-          iridescenceThicknessRange={[0, 1400]}
+          temporalDistortion={0.08}
+          attenuationColor="#9fdce8"
+          attenuationDistance={18}
+          iridescence={0.1}
+          iridescenceIOR={1.2}
+          iridescenceThicknessRange={[100, 400]}
         />
       </mesh>
       <group ref={ref}>{children}</group>
     </group>
   )
 }
+
+useGLTF.preload(shapesModel)
