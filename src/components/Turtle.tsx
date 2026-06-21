@@ -30,3 +30,5 @@ export const Turtle = ({ reducedMotion = false, speed = 0.5, ...props }: TurtleP
 
   return <primitive object={scene} {...props} />
 }
+
+useGLTF.preload(turtleModel)
