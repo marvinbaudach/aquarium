@@ -88,7 +88,7 @@ export const App = ({ spheres }: AppProps): ReactElement => {
     <div style={wrapperStyle}>
       <WebGLErrorBoundary>
         <Canvas
-          shadows
+          shadows={!isMobile}
           dpr={dpr}
           camera={{ position: [30, 0, -3], fov: 35, near: 1, far: 120 }}
           gl={{ stencil: true, antialias: !isMobile }}
@@ -109,11 +109,13 @@ export const App = ({ spheres }: AppProps): ReactElement => {
             <fog attach="fog" args={[bgColor, 20, 60]} />
             <SeaBackground isNight={isNight} />
             {/** Static light sources piercing the water from above */}
-            <spotLight position={[0, 22, 0]} angle={0.5} penumbra={1} intensity={isNight ? 0.7 : 1.6} color={isNight ? '#9fc8ff' : '#fff4d6'} castShadow />
-            <ambientLight intensity={isNight ? 0.22 : 0.5} color={isNight ? '#2a4a6a' : '#9fc8d6'} />
-            <hemisphereLight args={[isNight ? '#1a2a40' : '#cdeef7', '#244a52', isNight ? 0.3 : 0.75]} />
+            <spotLight position={[0, 22, 0]} angle={0.5} penumbra={1} intensity={isNight ? 0.7 : 1.6} color={isNight ? '#9fc8ff' : '#fff4d6'} castShadow={!isMobile} />
+            <ambientLight intensity={isNight ? 0.4 : 0.75} color={isNight ? '#2a4a6a' : '#9fc8d6'} />
+            <hemisphereLight args={[isNight ? '#1a2a40' : '#cdeef7', '#244a52', isNight ? 0.45 : 1.0]} />
             {/** Fill light from the camera side so the turtle reads through the glass */}
-            <directionalLight position={[22, 6, -12]} intensity={isNight ? 0.35 : 0.9} color="#dff2ff" />
+            <directionalLight position={[26, 5, -3]} intensity={isNight ? 0.6 : 1.5} color="#dff2ff" />
+            {/** Dedicated front key aimed at the turtle so its shell detail reads through the glass without zooming in */}
+            <spotLight position={[24, 8, -3]} angle={0.7} penumbra={0.8} distance={90} intensity={isNight ? 1.0 : 2.4} color={isNight ? '#bcd8ff' : '#ffffff'} />
             {/** Scene contents with subtle mouse-driven parallax */}
             <MouseParallax intensity={0.018}>
               {/** Glass aquarium — contents are stencil-masked to the glass volume */}
@@ -126,30 +128,35 @@ export const App = ({ spheres }: AppProps): ReactElement => {
                     <Turtle speed={turtleSpeed} position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
                   </Float>
                 )}
-                <Spheres spheres={visibleSpheres} />
-                {/** Procedural fish school circling near the surface */}
-                <FishSchool />
-                {/** Continuous ascending bubble stream */}
-                <Bubbles />
-                {/** Suspended drifting particles (marine snow) */}
-                <Motes />
+                {/** Floating spheres, fish school and bubble stream are all
+                    skipped in the low-power path — extra draw calls and
+                    per-frame pool updates that phones don't need. */}
+                {!isMobile && <Spheres spheres={visibleSpheres} />}
+                {!isMobile && <FishSchool />}
+                {!isMobile && <Bubbles />}
+                {/** Suspended drifting particles (marine snow) — skipped in the
+                    low-power path to free per-frame budget on phones. */}
+                {!isMobile && <Motes />}
               </Aquarium>
-              {/** Soft shadows */}
-              <SoftShadows />
+              {/** Soft shadows accumulate 100 frames from 8 light samples — a
+                  startup spike that stutters low-power GPUs, so skip on mobile. */}
+              {!isMobile && <SoftShadows />}
               {/** Animated caustics on the seabed under the tank */}
-              <Caustics />
+              {!isMobile && <Caustics />}
             </MouseParallax>
             {/** Custom environment map */}
             <AquariumEnvironment />
-            {/** Cinematic post: Bloom driven by dock slider. */}
-            <PostProcessing bloomIntensity={bloomIntensity} />
+            {/** Cinematic post: full-screen multi-pass composer (Bloom + SMAA +
+                Vignette) is the single biggest GPU cost — drop it on low-power
+                devices so the scene stays smooth. */}
+            {!isMobile && <PostProcessing bloomIntensity={bloomIntensity} />}
             <CameraControls ref={cameraRef} truckSpeed={0} dollySpeed={1} minDistance={14} maxDistance={42} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
           </Suspense>
         </Canvas>
       </WebGLErrorBoundary>
       <SceneLoader />
       <StatsOverlay statsRef={statsRef} dpr={dpr} />
-      <ControlDock controls={controls} />
+      <ControlDock controls={controls} isMobile={isMobile} />
     </div>
   )
 }

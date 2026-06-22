@@ -4,6 +4,8 @@ import styles from './ControlDock.module.css'
 
 interface ControlDockProps {
   controls: SceneControls
+  /** Low-power path hides the spheres + bloom (those effects are disabled). */
+  isMobile?: boolean
 }
 
 interface SliderControlProps {
@@ -40,7 +42,7 @@ const SliderControl = ({ id, label, value, display, min, max, step, onChange }: 
   </div>
 )
 
-export const ControlDock = ({ controls }: ControlDockProps): ReactElement => {
+export const ControlDock = ({ controls, isMobile = false }: ControlDockProps): ReactElement => {
   const { turtleSpeed, setTurtleSpeed, sphereCount, setSphereCount, isNight, setIsNight, bloomIntensity, setBloomIntensity } = controls
 
   return (
@@ -55,17 +57,21 @@ export const ControlDock = ({ controls }: ControlDockProps): ReactElement => {
         step={0.05}
         onChange={setTurtleSpeed}
       />
-      <SliderControl id="ctrl-spheres" label="Spheres" value={sphereCount} display={String(sphereCount)} min={0} max={12} step={1} onChange={setSphereCount} />
-      <SliderControl
-        id="ctrl-bloom"
-        label="Bloom"
-        value={bloomIntensity}
-        display={bloomIntensity.toFixed(2)}
-        min={0}
-        max={2}
-        step={0.05}
-        onChange={setBloomIntensity}
-      />
+      {!isMobile && (
+        <SliderControl id="ctrl-spheres" label="Spheres" value={sphereCount} display={String(sphereCount)} min={0} max={12} step={1} onChange={setSphereCount} />
+      )}
+      {!isMobile && (
+        <SliderControl
+          id="ctrl-bloom"
+          label="Bloom"
+          value={bloomIntensity}
+          display={bloomIntensity.toFixed(2)}
+          min={0}
+          max={2}
+          step={0.05}
+          onChange={setBloomIntensity}
+        />
+      )}
       <button
         type="button"
         className={styles.toggle}
