@@ -69,7 +69,9 @@ export const App = ({ spheres }: AppProps): ReactElement => {
       void cam.setLookAt(nx, ny, nz, 0, 0, 0, true)
     }
     window.addEventListener('orientationchange', onResize)
-    return () => { window.removeEventListener('orientationchange', onResize) }
+    return () => {
+      window.removeEventListener('orientationchange', onResize)
+    }
   }, [reducedMotion])
   const { turtleSpeed, sphereCount, isNight, bloomIntensity } = controls
 
@@ -109,13 +111,27 @@ export const App = ({ spheres }: AppProps): ReactElement => {
             <fog attach="fog" args={[bgColor, 20, 60]} />
             <SeaBackground isNight={isNight} />
             {/** Static light sources piercing the water from above */}
-            <spotLight position={[0, 22, 0]} angle={0.5} penumbra={1} intensity={isNight ? 0.7 : 1.6} color={isNight ? '#9fc8ff' : '#fff4d6'} castShadow={!isMobile} />
+            <spotLight
+              position={[0, 22, 0]}
+              angle={0.5}
+              penumbra={1}
+              intensity={isNight ? 0.7 : 1.6}
+              color={isNight ? '#9fc8ff' : '#fff4d6'}
+              castShadow={!isMobile}
+            />
             <ambientLight intensity={isNight ? 0.4 : 0.75} color={isNight ? '#2a4a6a' : '#9fc8d6'} />
             <hemisphereLight args={[isNight ? '#1a2a40' : '#cdeef7', '#244a52', isNight ? 0.45 : 1.0]} />
             {/** Fill light from the camera side so the turtle reads through the glass */}
             <directionalLight position={[26, 5, -3]} intensity={isNight ? 0.6 : 1.5} color="#dff2ff" />
             {/** Dedicated front key aimed at the turtle so its shell detail reads through the glass without zooming in */}
-            <spotLight position={[24, 8, -3]} angle={0.7} penumbra={0.8} distance={90} intensity={isNight ? 1.0 : 2.4} color={isNight ? '#bcd8ff' : '#ffffff'} />
+            <spotLight
+              position={[24, 8, -3]}
+              angle={0.7}
+              penumbra={0.8}
+              distance={90}
+              intensity={isNight ? 1.0 : 2.4}
+              color={isNight ? '#bcd8ff' : '#ffffff'}
+            />
             {/** Scene contents with subtle mouse-driven parallax */}
             <MouseParallax intensity={0.018}>
               {/** Glass aquarium — contents are stencil-masked to the glass volume */}
