@@ -58,7 +58,16 @@ export const ControlDock = ({ controls, isMobile = false }: ControlDockProps): R
         onChange={setTurtleSpeed}
       />
       {!isMobile && (
-        <SliderControl id="ctrl-spheres" label="Spheres" value={sphereCount} display={String(sphereCount)} min={0} max={12} step={1} onChange={setSphereCount} />
+        <SliderControl
+          id="ctrl-spheres"
+          label="Spheres"
+          value={sphereCount}
+          display={String(sphereCount)}
+          min={0}
+          max={12}
+          step={1}
+          onChange={setSphereCount}
+        />
       )}
       {!isMobile && (
         <SliderControl
