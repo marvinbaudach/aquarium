@@ -166,7 +166,7 @@ export const App = ({ spheres }: AppProps): ReactElement => {
                 Vignette) is the single biggest GPU cost — drop it on low-power
                 devices so the scene stays smooth. */}
             {!isMobile && <PostProcessing bloomIntensity={bloomIntensity} />}
-            <CameraControls ref={cameraRef} truckSpeed={0} dollySpeed={1} minDistance={14} maxDistance={42} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
+            <CameraControls ref={cameraRef} truckSpeed={0} dollySpeed={1} minDistance={14} maxDistance={34} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
           </Suspense>
         </Canvas>
       </WebGLErrorBoundary>
