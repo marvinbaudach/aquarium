@@ -1,11 +1,10 @@
-import { useMemo, useRef } from 'react'
+import { memo, useMemo, useRef } from 'react'
 import type { ReactElement } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
 // Continuous ascending bubble stream. Pooled, auto-spawns from the floor of
 // the aquarium. Placed as a child of the aquarium group → local space.
-/* eslint-disable react-hooks/immutability, react-hooks/purity */
 
 const POOL = 100
 const SPAWN_INTERVAL = 0.18
@@ -23,7 +22,10 @@ interface Bubble {
 
 const rand = (min: number, max: number): number => min + Math.random() * (max - min)
 
-export const Bubbles = (): ReactElement => {
+// Memoized: takes no props and animates entirely through useFrame, so it must
+// never re-reconcile its 100-mesh pool when the parent re-renders (e.g. on every
+// slider tick).
+export const Bubbles = memo(function Bubbles(): ReactElement {
   const groupRef = useRef<THREE.Group>(null)
   const timer = useRef(0)
   const cursor = useRef(0)
@@ -97,4 +99,4 @@ export const Bubbles = (): ReactElement => {
       ))}
     </group>
   )
-}
+})

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export interface SceneControls {
   /** Turtle swim-cycle timeScale (0 = frozen, 1 = full speed). */
@@ -85,22 +85,32 @@ export const useSceneControls = (): SceneControls => {
     persist(state)
   }, [state])
 
-  return {
-    turtleSpeed: state.turtleSpeed,
-    setTurtleSpeed: (turtleSpeed) => {
-      setState((s) => ({ ...s, turtleSpeed }))
-    },
-    sphereCount: state.sphereCount,
-    setSphereCount: (sphereCount) => {
-      setState((s) => ({ ...s, sphereCount }))
-    },
-    isNight: state.isNight,
-    setIsNight: (isNight) => {
-      setState((s) => ({ ...s, isNight }))
-    },
-    bloomIntensity: state.bloomIntensity,
-    setBloomIntensity: (bloomIntensity) => {
-      setState((s) => ({ ...s, bloomIntensity }))
-    }
-  }
+  // Stable setter identities (functional updates → no deps) so consumers can be
+  // safely memoized and effect/callback deps don't churn on every render.
+  const setTurtleSpeed = useCallback((turtleSpeed: number) => {
+    setState((s) => ({ ...s, turtleSpeed }))
+  }, [])
+  const setSphereCount = useCallback((sphereCount: number) => {
+    setState((s) => ({ ...s, sphereCount }))
+  }, [])
+  const setIsNight = useCallback((isNight: boolean) => {
+    setState((s) => ({ ...s, isNight }))
+  }, [])
+  const setBloomIntensity = useCallback((bloomIntensity: number) => {
+    setState((s) => ({ ...s, bloomIntensity }))
+  }, [])
+
+  return useMemo(
+    () => ({
+      turtleSpeed: state.turtleSpeed,
+      setTurtleSpeed,
+      sphereCount: state.sphereCount,
+      setSphereCount,
+      isNight: state.isNight,
+      setIsNight,
+      bloomIntensity: state.bloomIntensity,
+      setBloomIntensity
+    }),
+    [state, setTurtleSpeed, setSphereCount, setIsNight, setBloomIntensity]
+  )
 }

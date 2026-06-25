@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { memo, useMemo, useRef } from 'react'
 import type { ReactElement } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
@@ -7,7 +7,6 @@ import { useFrame } from '@react-three/fiber'
 // (no external model → zero licensing) from a body + tail per fish, oriented
 // along travel with a gentle bank. Placed as a child of the aquarium group, so
 // it inherits the glass stencil mask like the rest of the contents.
-/* eslint-disable react-hooks/purity */
 
 const COUNT = 16
 const COLORS = ['#d7e2e6', '#ffd27f', '#7fd4e6', '#f4946b', '#bfe3a0']
@@ -25,7 +24,9 @@ interface Fish {
 
 const rand = (min: number, max: number): number => min + Math.random() * (max - min)
 
-export const FishSchool = (): ReactElement => {
+// Memoized: prop-less and self-animating via useFrame, so it should not
+// re-reconcile its 16-fish subtree when the parent re-renders.
+export const FishSchool = memo(function FishSchool(): ReactElement {
   const refs = useRef<(THREE.Group | null)[]>([])
   const fish = useMemo<Fish[]>(
     () =>
@@ -86,4 +87,4 @@ export const FishSchool = (): ReactElement => {
       ))}
     </group>
   )
-}
+})
