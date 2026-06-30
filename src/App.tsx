@@ -90,10 +90,10 @@ export const App = ({ spheres }: AppProps): ReactElement => {
     <div style={wrapperStyle}>
       <WebGLErrorBoundary>
         <Canvas
-          shadows={!isMobile}
+          shadows
           dpr={dpr}
           camera={{ position: [30, 0, -3], fov: 35, near: 1, far: 120 }}
-          gl={{ stencil: true, antialias: !isMobile }}
+          gl={{ stencil: true, antialias: true }}
           aria-label="Interactive 3D aquarium: a sea turtle swims inside a glass cube surrounded by floating spheres. Drag to orbit."
           role="img"
         >
@@ -103,7 +103,7 @@ export const App = ({ spheres }: AppProps): ReactElement => {
                 setDpr(Math.max(0.5, dpr - 0.25))
               }}
               onIncline={() => {
-                setDpr(Math.min(isMobile ? 1.5 : 2, dpr + 0.25))
+                setDpr(Math.min(2, dpr + 0.25))
               }}
             />
             <StatsBridge statsRef={statsRef} />
@@ -111,14 +111,7 @@ export const App = ({ spheres }: AppProps): ReactElement => {
             <fog attach="fog" args={[bgColor, 20, 60]} />
             <SeaBackground isNight={isNight} />
             {/** Static light sources piercing the water from above */}
-            <spotLight
-              position={[0, 22, 0]}
-              angle={0.5}
-              penumbra={1}
-              intensity={isNight ? 0.7 : 1.6}
-              color={isNight ? '#9fc8ff' : '#fff4d6'}
-              castShadow={!isMobile}
-            />
+            <spotLight position={[0, 22, 0]} angle={0.5} penumbra={1} intensity={isNight ? 0.7 : 1.6} color={isNight ? '#9fc8ff' : '#fff4d6'} castShadow />
             <ambientLight intensity={isNight ? 0.4 : 0.75} color={isNight ? '#2a4a6a' : '#9fc8d6'} />
             <hemisphereLight args={[isNight ? '#1a2a40' : '#cdeef7', '#244a52', isNight ? 0.45 : 1.0]} />
             {/** Fill light from the camera side so the turtle reads through the glass */}
@@ -144,28 +137,28 @@ export const App = ({ spheres }: AppProps): ReactElement => {
                     <Turtle speed={turtleSpeed} position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
                   </Float>
                 )}
-                {/** Floating spheres, fish school and bubble stream are all
-                    skipped in the low-power path — extra draw calls and
-                    per-frame pool updates that phones don't need. */}
-                {!isMobile && <Spheres spheres={visibleSpheres} />}
-                {!isMobile && <FishSchool />}
-                {!isMobile && <Bubbles />}
-                {/** Suspended drifting particles (marine snow) — skipped in the
-                    low-power path to free per-frame budget on phones. */}
-                {!isMobile && <Motes />}
+                {/** Floating spheres, fish school and bubble stream — kept on
+                    every device now; modern phones absorb the extra draw calls
+                    and PerformanceMonitor trims DPR if a weak GPU can't. */}
+                <Spheres spheres={visibleSpheres} />
+                <FishSchool />
+                <Bubbles />
+                {/** Suspended drifting particles (marine snow) */}
+                <Motes />
               </Aquarium>
               {/** Soft shadows accumulate 100 frames from 8 light samples — a
                   startup spike that stutters low-power GPUs, so skip on mobile. */}
               {!isMobile && <SoftShadows />}
               {/** Animated caustics on the seabed under the tank */}
-              {!isMobile && <Caustics />}
+              <Caustics />
             </MouseParallax>
             {/** Custom environment map */}
             <AquariumEnvironment />
             {/** Cinematic post: full-screen multi-pass composer (Bloom + SMAA +
-                Vignette) is the single biggest GPU cost — drop it on low-power
-                devices so the scene stays smooth. */}
-            {!isMobile && <PostProcessing bloomIntensity={bloomIntensity} />}
+                Vignette). Biggest GPU cost, but kept on mobile now — it carries
+                the cinematic look and SMAA cleans edges; PerformanceMonitor
+                drops DPR first if a device struggles. */}
+            <PostProcessing bloomIntensity={bloomIntensity} />
             <CameraControls ref={cameraRef} truckSpeed={0} dollySpeed={1} minDistance={14} maxDistance={34} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
           </Suspense>
         </Canvas>

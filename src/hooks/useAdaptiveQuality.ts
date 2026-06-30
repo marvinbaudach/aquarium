@@ -35,13 +35,21 @@ const detectReducedMotion = (): boolean => {
 export const useAdaptiveQuality = (): AdaptiveQuality => {
   const [isMobile] = useState(detectLowPower)
   const [reducedMotion, setReducedMotion] = useState(detectReducedMotion)
-  const [dpr, setDpr] = useState(isMobile ? 1 : 1.5)
+  // Start optimistic on every device — modern phones render this scene with
+  // headroom to spare, and a soft DPR-1 image on a 2–3x retina panel is the
+  // single most visible "low quality" tell. PerformanceMonitor trims DPR live
+  // if a genuinely weak GPU can't keep up, so an over-eager guess self-corrects.
+  const [dpr, setDpr] = useState(1.5)
 
   useEffect(() => {
     const mq = matchMedia('(prefers-reduced-motion: reduce)')
-    const onChange = (): void => { setReducedMotion(mq.matches) }
+    const onChange = (): void => {
+      setReducedMotion(mq.matches)
+    }
     mq.addEventListener('change', onChange)
-    return () => { mq.removeEventListener('change', onChange) }
+    return () => {
+      mq.removeEventListener('change', onChange)
+    }
   }, [])
 
   return { isMobile, reducedMotion, dpr, setDpr }

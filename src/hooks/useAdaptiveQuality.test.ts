@@ -30,7 +30,9 @@ describe('useAdaptiveQuality', () => {
       const { result } = renderHook(() => useAdaptiveQuality())
 
       expect(result.current.isMobile).toBe(true)
-      expect(result.current.dpr).toBe(1)
+      // Every device now starts at the same optimistic DPR; PerformanceMonitor
+      // trims it live on genuinely weak GPUs.
+      expect(result.current.dpr).toBe(1.5)
     })
 
     it('does not flag a desktop with a fine pointer', () => {
