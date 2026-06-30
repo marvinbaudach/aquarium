@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { renderHook } from '@testing-library/react'
-import { useAdaptiveQuality } from './useAdaptiveQuality'
+import { renderHook, act } from '@testing-library/react'
+import { useAdaptiveQuality, QUALITY_TIERS } from './useAdaptiveQuality'
 
 type Matcher = (query: string) => boolean
 
@@ -30,9 +30,9 @@ describe('useAdaptiveQuality', () => {
       const { result } = renderHook(() => useAdaptiveQuality())
 
       expect(result.current.isMobile).toBe(true)
-      // Every device now starts at the same optimistic DPR; PerformanceMonitor
-      // trims it live on genuinely weak GPUs.
-      expect(result.current.dpr).toBe(1.5)
+      // Mobile starts mid-ladder (rung 3) — optimistic but below the top.
+      expect(result.current.level).toBe(3)
+      expect(result.current.tier.dpr).toBe(1.5)
     })
 
     it('does not flag a desktop with a fine pointer', () => {
@@ -40,7 +40,9 @@ describe('useAdaptiveQuality', () => {
       const { result } = renderHook(() => useAdaptiveQuality())
 
       expect(result.current.isMobile).toBe(false)
-      expect(result.current.dpr).toBe(1.5)
+      // Desktop starts one rung higher (rung 4).
+      expect(result.current.level).toBe(4)
+      expect(result.current.tier.dpr).toBe(1.75)
     })
 
     it('does not flag a touchscreen laptop (coarse + fine both present)', () => {
@@ -48,6 +50,55 @@ describe('useAdaptiveQuality', () => {
       const { result } = renderHook(() => useAdaptiveQuality())
 
       expect(result.current.isMobile).toBe(false)
+    })
+  })
+
+  describe('quality ladder', () => {
+    it('steps down on decline and back up on incline', () => {
+      stubMatchMedia((q) => q.includes('any-pointer: fine')) // desktop, starts at 4
+      const { result } = renderHook(() => useAdaptiveQuality())
+
+      act(() => {
+        result.current.decline()
+      })
+      expect(result.current.level).toBe(3)
+
+      act(() => {
+        result.current.incline()
+      })
+      expect(result.current.level).toBe(4)
+    })
+
+    it('never declines below the lowest rung', () => {
+      stubMatchMedia((q) => q.includes('any-pointer: fine'))
+      const { result } = renderHook(() => useAdaptiveQuality())
+
+      act(() => {
+        for (let i = 0; i < 10; i++) result.current.decline()
+      })
+      expect(result.current.level).toBe(0)
+      expect(result.current.tier).toBe(QUALITY_TIERS[0])
+    })
+
+    it('caps desktop at the top rung', () => {
+      stubMatchMedia((q) => q.includes('any-pointer: fine'))
+      const { result } = renderHook(() => useAdaptiveQuality())
+
+      act(() => {
+        for (let i = 0; i < 10; i++) result.current.incline()
+      })
+      expect(result.current.level).toBe(QUALITY_TIERS.length - 1)
+    })
+
+    it('caps mobile one rung below the top to avoid the soft-shadow startup stutter', () => {
+      stubMatchMedia((q) => q.includes('pointer: coarse'))
+      const { result } = renderHook(() => useAdaptiveQuality())
+
+      act(() => {
+        for (let i = 0; i < 10; i++) result.current.incline()
+      })
+      expect(result.current.level).toBe(QUALITY_TIERS.length - 2)
+      expect(result.current.tier.softShadows).toBe(false)
     })
   })
 

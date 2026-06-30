@@ -51,9 +51,11 @@ const dimStyle: CSSProperties = { opacity: 0.6 }
 interface StatsOverlayProps {
   statsRef: StatsRef
   dpr: number
+  qualityLevel: number
+  maxQualityLevel: number
 }
 
-export const StatsOverlay = ({ statsRef, dpr }: StatsOverlayProps): ReactElement => {
+export const StatsOverlay = ({ statsRef, dpr, qualityLevel, maxQualityLevel }: StatsOverlayProps): ReactElement => {
   const [open, setOpen] = useState(false)
   const [display, setDisplay] = useState({ fps: 0, triangles: 0, calls: 0 })
 
@@ -106,6 +108,10 @@ export const StatsOverlay = ({ statsRef, dpr }: StatsOverlayProps): ReactElement
           <div style={rowStyle}>
             <span style={dimStyle}>DPR</span>
             <span>{dpr.toFixed(2)}</span>
+          </div>
+          <div style={rowStyle}>
+            <span style={dimStyle}>QUALITY</span>
+            <span>{qualityLevel}/{maxQualityLevel}</span>
           </div>
           <div style={rowStyle}>
             <span style={dimStyle}>TRIS</span>

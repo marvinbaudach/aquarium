@@ -20,7 +20,7 @@ import { SceneLoader } from './components/SceneLoader'
 import { StatsOverlay, StatsBridge } from './components/StatsOverlay'
 import type { RenderStats } from './components/StatsOverlay'
 import { WebGLErrorBoundary, WebGLUnavailable, isWebGLAvailable } from './components/WebGLErrorBoundary'
-import { useAdaptiveQuality } from './hooks/useAdaptiveQuality'
+import { useAdaptiveQuality, QUALITY_TIERS } from './hooks/useAdaptiveQuality'
 import { useSceneControls } from './hooks/useSceneControls'
 import type { AppProps } from './types'
 
@@ -31,7 +31,7 @@ const wrapperStyle: CSSProperties = {
 }
 
 export const App = ({ spheres }: AppProps): ReactElement => {
-  const { isMobile, reducedMotion, dpr, setDpr } = useAdaptiveQuality()
+  const { isMobile, reducedMotion, tier, level, decline, incline } = useAdaptiveQuality()
   const controls = useSceneControls()
   const statsRef = useRef<RenderStats>({ triangles: 0, calls: 0 })
   const cameraRef = useRef<ComponentRef<typeof CameraControls>>(null)
@@ -91,27 +91,23 @@ export const App = ({ spheres }: AppProps): ReactElement => {
       <WebGLErrorBoundary>
         <Canvas
           shadows
-          dpr={dpr}
+          dpr={tier.dpr}
           camera={{ position: [30, 0, -3], fov: 35, near: 1, far: 120 }}
           gl={{ stencil: true, antialias: true }}
           aria-label="Interactive 3D aquarium: a sea turtle swims inside a glass cube surrounded by floating spheres. Drag to orbit."
           role="img"
         >
           <Suspense fallback={null}>
-            <PerformanceMonitor
-              onDecline={() => {
-                setDpr(Math.max(0.5, dpr - 0.25))
-              }}
-              onIncline={() => {
-                setDpr(Math.min(2, dpr + 0.25))
-              }}
-            />
+            {/** Walks the quality ladder live: drops a rung when frames fall,
+                climbs one back when headroom returns. flipflops caps the
+                oscillation so a device parked between two rungs settles. */}
+            <PerformanceMonitor onDecline={decline} onIncline={incline} flipflops={3} onFallback={decline} />
             <StatsBridge statsRef={statsRef} />
             <color attach="background" args={[bgColor]} />
             <fog attach="fog" args={[bgColor, 20, 60]} />
             <SeaBackground isNight={isNight} />
             {/** Static light sources piercing the water from above */}
-            <spotLight position={[0, 22, 0]} angle={0.5} penumbra={1} intensity={isNight ? 0.7 : 1.6} color={isNight ? '#9fc8ff' : '#fff4d6'} castShadow />
+            <spotLight position={[0, 22, 0]} angle={0.5} penumbra={1} intensity={isNight ? 0.7 : 1.6} color={isNight ? '#9fc8ff' : '#fff4d6'} castShadow={tier.shadows} />
             <ambientLight intensity={isNight ? 0.4 : 0.75} color={isNight ? '#2a4a6a' : '#9fc8d6'} />
             <hemisphereLight args={[isNight ? '#1a2a40' : '#cdeef7', '#244a52', isNight ? 0.45 : 1.0]} />
             {/** Fill light from the camera side so the turtle reads through the glass */}
@@ -137,34 +133,36 @@ export const App = ({ spheres }: AppProps): ReactElement => {
                     <Turtle speed={turtleSpeed} position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
                   </Float>
                 )}
-                {/** Floating spheres, fish school and bubble stream — kept on
-                    every device now; modern phones absorb the extra draw calls
-                    and PerformanceMonitor trims DPR if a weak GPU can't. */}
-                <Spheres spheres={visibleSpheres} />
-                <FishSchool />
-                <Bubbles />
-                {/** Suspended drifting particles (marine snow) */}
-                <Motes />
+                {/** Floating spheres, fish school, bubbles and marine-snow
+                    motes — extra draw calls and per-frame pool updates, dropped
+                    together on the lowest rung. */}
+                {tier.particles && (
+                  <>
+                    <Spheres spheres={visibleSpheres} />
+                    <FishSchool />
+                    <Bubbles />
+                    <Motes />
+                  </>
+                )}
               </Aquarium>
-              {/** Soft shadows accumulate 100 frames from 8 light samples — a
-                  startup spike that stutters low-power GPUs, so skip on mobile. */}
-              {!isMobile && <SoftShadows />}
+              {/** Soft shadows accumulate 100 frames from 8 light samples — only
+                  on the top rung, never on mobile (capped below it). */}
+              {tier.softShadows && <SoftShadows />}
               {/** Animated caustics on the seabed under the tank */}
-              <Caustics />
+              {tier.caustics && <Caustics />}
             </MouseParallax>
             {/** Custom environment map */}
             <AquariumEnvironment />
             {/** Cinematic post: full-screen multi-pass composer (Bloom + SMAA +
-                Vignette). Biggest GPU cost, but kept on mobile now — it carries
-                the cinematic look and SMAA cleans edges; PerformanceMonitor
-                drops DPR first if a device struggles. */}
-            <PostProcessing bloomIntensity={bloomIntensity} />
+                Vignette). Single biggest GPU cost, so it's the first rung the
+                monitor drops and the last it restores. */}
+            {tier.postProcessing && <PostProcessing bloomIntensity={bloomIntensity} />}
             <CameraControls ref={cameraRef} truckSpeed={0} dollySpeed={1} minDistance={14} maxDistance={34} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
           </Suspense>
         </Canvas>
       </WebGLErrorBoundary>
       <SceneLoader />
-      <StatsOverlay statsRef={statsRef} dpr={dpr} />
+      <StatsOverlay statsRef={statsRef} dpr={tier.dpr} qualityLevel={level} maxQualityLevel={QUALITY_TIERS.length - 1} />
       <ControlDock controls={controls} isMobile={isMobile} />
     </div>
   )
