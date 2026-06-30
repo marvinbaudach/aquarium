@@ -107,7 +107,14 @@ export const App = ({ spheres }: AppProps): ReactElement => {
             <fog attach="fog" args={[bgColor, 20, 60]} />
             <SeaBackground isNight={isNight} />
             {/** Static light sources piercing the water from above */}
-            <spotLight position={[0, 22, 0]} angle={0.5} penumbra={1} intensity={isNight ? 0.7 : 1.6} color={isNight ? '#9fc8ff' : '#fff4d6'} castShadow={tier.shadows} />
+            <spotLight
+              position={[0, 22, 0]}
+              angle={0.5}
+              penumbra={1}
+              intensity={isNight ? 0.7 : 1.6}
+              color={isNight ? '#9fc8ff' : '#fff4d6'}
+              castShadow={tier.shadows}
+            />
             <ambientLight intensity={isNight ? 0.4 : 0.75} color={isNight ? '#2a4a6a' : '#9fc8d6'} />
             <hemisphereLight args={[isNight ? '#1a2a40' : '#cdeef7', '#244a52', isNight ? 0.45 : 1.0]} />
             {/** Fill light from the camera side so the turtle reads through the glass */}

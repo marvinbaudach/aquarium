@@ -111,7 +111,9 @@ export const StatsOverlay = ({ statsRef, dpr, qualityLevel, maxQualityLevel }: S
           </div>
           <div style={rowStyle}>
             <span style={dimStyle}>QUALITY</span>
-            <span>{qualityLevel}/{maxQualityLevel}</span>
+            <span>
+              {qualityLevel}/{maxQualityLevel}
+            </span>
           </div>
           <div style={rowStyle}>
             <span style={dimStyle}>TRIS</span>
