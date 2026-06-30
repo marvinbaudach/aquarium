@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import type { ComponentRef, CSSProperties, ReactElement } from 'react'
 import * as THREE from 'three'
 import { Canvas } from '@react-three/fiber'
@@ -35,6 +35,23 @@ export const App = ({ spheres }: AppProps): ReactElement => {
   const controls = useSceneControls()
   const statsRef = useRef<RenderStats>({ triangles: 0, calls: 0 })
   const cameraRef = useRef<ComponentRef<typeof CameraControls>>(null)
+
+  // Hold the quality ladder still during the opening seconds. On mount the GPU
+  // is busy compiling shaders, baking the environment and easing the cinematic
+  // camera in — frame times spike for reasons unrelated to the device's real
+  // budget. Letting PerformanceMonitor judge that window makes it drop rungs and
+  // with them post-processing, so the cube renders raw and washed-out until
+  // frames recover (~3-5s). Skipping those first frames keeps the scene on its
+  // starting rung — post-processing on — and adaptation begins once things settle.
+  const [monitorReady, setMonitorReady] = useState(false)
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setMonitorReady(true)
+    }, 3500)
+    return () => {
+      window.clearTimeout(id)
+    }
+  }, [])
 
   // Cinematic entrance: snap to a wide, high vantage then ease into the resting
   // framing. Skipped entirely under prefers-reduced-motion. The resting distance
@@ -101,7 +118,7 @@ export const App = ({ spheres }: AppProps): ReactElement => {
             {/** Walks the quality ladder live: drops a rung when frames fall,
                 climbs one back when headroom returns. flipflops caps the
                 oscillation so a device parked between two rungs settles. */}
-            <PerformanceMonitor onDecline={decline} onIncline={incline} flipflops={3} onFallback={decline} />
+            {monitorReady && <PerformanceMonitor onDecline={decline} onIncline={incline} flipflops={3} onFallback={decline} />}
             <StatsBridge statsRef={statsRef} />
             <color attach="background" args={[bgColor]} />
             <fog attach="fog" args={[bgColor, 20, 60]} />
@@ -152,18 +169,22 @@ export const App = ({ spheres }: AppProps): ReactElement => {
                   </>
                 )}
               </Aquarium>
-              {/** Soft shadows accumulate 100 frames from 8 light samples — only
-                  on the top rung, never on mobile (capped below it). */}
-              {tier.softShadows && <SoftShadows />}
+              {/** Soft shadows accumulate 100 frames from 8 light samples on
+                  mount — a bright one-off bake the glass refracts into a washed
+                  panel. Decided ONCE by device class, never toggled by the live
+                  ladder: re-mounting it mid-session re-triggers that bake and
+                  flashes the wash, which is the startup bug. */}
+              {!isMobile && <SoftShadows />}
               {/** Animated caustics on the seabed under the tank */}
               {tier.caustics && <Caustics />}
             </MouseParallax>
             {/** Custom environment map */}
             <AquariumEnvironment />
             {/** Cinematic post: full-screen multi-pass composer (Bloom + SMAA +
-                Vignette). Single biggest GPU cost, so it's the first rung the
-                monitor drops and the last it restores. */}
-            {tier.postProcessing && <PostProcessing bloomIntensity={bloomIntensity} />}
+                Vignette). The whole scene is graded around it — without the
+                composer the raw render reads bright and washed-out, so it stays
+                always on. DPR (driven by the ladder) is the perf lever instead. */}
+            <PostProcessing bloomIntensity={bloomIntensity} />
             <CameraControls ref={cameraRef} truckSpeed={0} dollySpeed={1} minDistance={14} maxDistance={34} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
           </Suspense>
         </Canvas>
