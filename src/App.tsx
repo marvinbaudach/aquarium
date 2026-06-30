@@ -11,7 +11,6 @@ import { AquariumEnvironment } from './components/AquariumEnvironment'
 import { PostProcessing } from './components/PostProcessing'
 import { MouseParallax } from './components/MouseParallax'
 import { Bubbles } from './components/Bubbles'
-import { FishSchool } from './components/FishSchool'
 import { Motes } from './components/Motes'
 import { Caustics } from './components/Caustics'
 import { SeaBackground } from './components/SeaBackground'
@@ -157,13 +156,12 @@ export const App = ({ spheres }: AppProps): ReactElement => {
                     <Turtle speed={turtleSpeed} position={[0, -0.5, -1]} rotation={[0, Math.PI, 0]} scale={23} />
                   </Float>
                 )}
-                {/** Floating spheres, fish school, bubbles and marine-snow
-                    motes — extra draw calls and per-frame pool updates, dropped
-                    together on the lowest rung. */}
+                {/** Floating spheres, bubbles and marine-snow motes — extra
+                    draw calls and per-frame pool updates, dropped together on
+                    the lowest rung. */}
                 {tier.particles && (
                   <>
                     <Spheres spheres={visibleSpheres} />
-                    <FishSchool />
                     <Bubbles />
                     <Motes />
                   </>
