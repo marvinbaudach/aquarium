@@ -5,17 +5,18 @@ import { useAdaptiveQuality, QUALITY_TIERS } from './useAdaptiveQuality'
 type Matcher = (query: string) => boolean
 
 // Minimal matchMedia stub: a single predicate decides which queries match.
+// The deprecated addListener/removeListener pair is left out on purpose; the
+// hook only uses addEventListener.
 const stubMatchMedia = (matches: Matcher): void => {
-  const impl = (query: string): MediaQueryList => ({
-    matches: matches(query),
-    media: query,
-    onchange: null,
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    dispatchEvent: vi.fn(() => true)
-  })
+  const impl = (query: string): MediaQueryList =>
+    ({
+      matches: matches(query),
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(() => true)
+    }) as unknown as MediaQueryList
   vi.stubGlobal('matchMedia', vi.fn(impl))
 }
 
